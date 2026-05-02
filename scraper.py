@@ -12,9 +12,7 @@ client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 URL = "https://connectbdesi-creator.github.io/ai-signal-brief/"
 
 def get_viral_hook(headline):
-    # This tells the AI to be a viral genius
-    prompt = f"Rewrite this AI news headline into a viral, catchy Instagram 'Hook' under 50 characters. Use 1 emoji. Headline: {headline}"
-    
+    prompt = f"Rewrite this AI news into a viral Instagram 'Hook' under 40 characters. Use 1 emoji. Be punchy! Headline: {headline}"
     completion = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[{"role": "user", "content": prompt}]
@@ -29,25 +27,35 @@ def make_magic():
     
     if update:
         raw_headline = update.text.strip()
-        
-        # 2. Get the viral version!
-        viral_headline = get_viral_hook(raw_headline)
+        viral_headline = get_viral_hook(raw_headline).upper()
         print(f"Viral Hook: {viral_headline}")
         
-        # 3. Create Image based on viral hook
-        encoded_prompt = urllib.parse.quote(f"Futuristic tech, {viral_headline}, cinematic")
+        # Get the AI image
+        encoded_prompt = urllib.parse.quote(f"Futuristic technology, {viral_headline}, highly detailed, 4k")
         image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1080&height=1350&nologo=true"
         
         img_res = requests.get(image_url)
         img = Image.open(io.BytesIO(img_res.content))
         draw = ImageDraw.Draw(img)
         
-        # 4. Draw the Box and the Viral Hook
-        draw.rectangle([50, 1050, 1030, 1250], fill="yellow", outline="black", width=8)
-        draw.text((80, 1100), viral_headline.upper(), fill="black")
+        # --- THE FONT FIX ---
+        # We download a bold font so it's guaranteed to work on GitHub
+        font_url = "https://github.com/google/fonts/raw/main/ofl/anton/Anton-Regular.ttf"
+        font_res = requests.get(font_url)
+        font = ImageFont.truetype(io.BytesIO(font_res.content), 80) # Size 80 is HUGE!
+        
+        # 1. Draw a Shadow/Border for the box (to make it pop)
+        draw.rectangle([45, 1045, 1035, 1255], fill="black") # Black shadow
+        draw.rectangle([50, 1050, 1030, 1250], fill="yellow", outline="black", width=10)
+        
+        # 2. Draw the Text in the center of the box
+        # We use a simple way to center it
+        draw.text((100, 1110), viral_headline, fill="black", font=font)
         
         img.save('latest_news_post.jpg')
-        print("Success! Viral post created.")
+        print("Success! Viral post with BIG TEXT created.")
+    else:
+        print("No news found!")
 
 if __name__ == "__main__":
     make_magic()
