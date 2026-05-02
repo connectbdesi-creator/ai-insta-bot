@@ -22,3 +22,9 @@ jobs:
 
       - name: Run the Robot
         run: python scraper.py
+      
+      - name: Save the Image
+        uses: actions/upload-artifact@v4
+        with:
+          name: instagram-post
+          path: latest_news_post.jpg

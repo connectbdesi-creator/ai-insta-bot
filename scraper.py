@@ -1,25 +1,40 @@
 import requests
 from bs4 import BeautifulSoup
+import urllib.parse
+import os
 
-# This tells the robot where to look
+# 1. Where to look for news
 URL = "https://connectbdesi-creator.github.io/ai-signal-brief/"
 
-def check_for_news():
-    print("Robot is waking up to check the news...")
+def make_magic():
+    print("Robot is checking the site...")
     response = requests.get(URL)
-    
-    # The robot 'reads' the page here
     soup = BeautifulSoup(response.text, 'html.parser')
     
-    # We look for the main updates (assuming they are in 'h2' or 'p' tags)
-    updates = soup.find_all(['h2', 'h3']) 
+    # Finding the latest headline
+    update = soup.find(['h2', 'h3'])
     
-    if updates:
-        latest_news = updates[0].text.strip()
-        print(f"I found something new! It says: {latest_news}")
-        # Later, we will send this to the Image Creator
+    if update:
+        headline = update.text.strip()
+        print(f"New Update Found: {headline}")
+        
+        # 2. Creating the "Art Prompt"
+        # We tell the AI what to draw based on your headline
+        art_prompt = f"Futuristic AI news, {headline}, cinematic lighting, high resolution, neon colors, 3d render"
+        encoded_prompt = urllib.parse.quote(art_prompt)
+        
+        # 3. Generating the Image
+        image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1080&height=1350&nologo=true"
+        print(f"Generating your Instagram image...")
+        
+        # 4. Saving the image to a folder
+        img_data = requests.get(image_url).content
+        with open('latest_news_post.jpg', 'wb') as handler:
+            handler.write(img_data)
+        
+        print("Success! Image saved as latest_news_post.jpg")
     else:
-        print("Nothing new right now. I'll check again later!")
+        print("No news found yet!")
 
 if __name__ == "__main__":
-    check_for_news()
+    make_magic()
